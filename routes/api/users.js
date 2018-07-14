@@ -11,7 +11,7 @@ router.get('/', (req, res) => {
   res.json({ users: 'Marcus' });
 });
 
-// @route POST api/users/register
+// @route GET api/users/register
 router.post('/register', (req, res) => {
   User.findOne({ email: req.body.email })
     .then(user => {
@@ -46,6 +46,30 @@ router.post('/register', (req, res) => {
       }
     })
     .catch(error => console.log('Error getting user: ', error));
+});
+
+// @route GET api/users/login
+router.post('/login', (req, res) => {
+  const email = req.body.email;
+  const password = req.body.password;
+
+  // Find the user by email address
+  User.findOne({ email }).then(user => {
+    // Check if user exists in database
+    if (!user) {
+      return res.status(404).json({ email: 'User not found!' });
+    }
+
+    // Check if the password is correct
+    bcrypt.compare(password, user.password).then(isMatch => {
+      if (isMatch) {
+        res.json({ msg: 'Success' });
+        // If user is found we need to generate the token
+      } else {
+        return res.status(400).json({ password: 'Incorrect Password' });
+      }
+    });
+  });
 });
 
 module.exports = router;
