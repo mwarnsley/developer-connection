@@ -13,12 +13,11 @@ const validateLoginInput = require('../../validation/login');
 // Loading the user model from mongoose
 const User = require('../../models/User');
 
-// @route GET api/users
-router.get('/', (req, res) => {
-  res.json({ users: 'Marcus' });
-});
-
-// @route GET api/users/register
+/**
+ * @route GET api/users/register
+ * @desc get the registration information
+ * @access Public
+ */
 router.post('/register', (req, res) => {
   console.log('req.body', req.body);
   const { errors, isValid } = validateRegisterInput(req.body);
@@ -63,7 +62,11 @@ router.post('/register', (req, res) => {
     .catch(error => console.log('Error getting user: ', error));
 });
 
-// @route GET api/users/login
+/**
+ * @route POST api/users/login
+ * @desc post to login the user
+ * @access Public
+ */
 router.post('/login', (req, res) => {
   const { errors, isValid } = validateLoginInput(req.body);
 
@@ -106,7 +109,11 @@ router.post('/login', (req, res) => {
   });
 });
 
-// @route GET api/users/current
+/**
+ * @route GET api/users/current
+ * @desc get the current user
+ * @access Private
+ */
 router.get(
   '/current',
   passport.authenticate('jwt', { session: false }),
