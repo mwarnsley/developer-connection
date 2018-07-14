@@ -2,6 +2,9 @@ const express = require('express');
 const router = express.Router();
 const gravatar = require('gravatar');
 const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
+const { secretOrKey } = require('../../config/keys');
+const passport = require('passport');
 
 // Loading the user model from mongoose
 const User = require('../../models/User');
@@ -63,13 +66,37 @@ router.post('/login', (req, res) => {
     // Check if the password is correct
     bcrypt.compare(password, user.password).then(isMatch => {
       if (isMatch) {
-        res.json({ msg: 'Success' });
-        // If user is found we need to generate the token
+        /**
+         * If user is found in the database we need to generate the token
+         * We need to create the payload to send
+         * We then need to sign the token
+         */
+        const payload = {
+          id: user._id,
+          name: user.name,
+          avatar: user.avatar
+        };
+        jwt.sign(payload, secretOrKey, { expiresIn: 3600 }, (error, token) => {
+          res.json({ success: true, jwtToken: `Bearer ${token}` });
+        });
       } else {
         return res.status(400).json({ password: 'Incorrect Password' });
       }
     });
   });
 });
+
+// @route GET api/users/current
+router.get(
+  '/current',
+  passport.authenticate('jwt', { session: false }),
+  (req, res) => {
+    res.json({
+      id: req.user.id,
+      name: req.user.name,
+      email: req.user.email
+    });
+  }
+);
 
 module.exports = router;

@@ -5,6 +5,7 @@ const users = require('./routes/api/users');
 const profile = require('./routes/api/profile');
 const posts = require('./routes/api/posts');
 const bodyParser = require('body-parser');
+const passport = require('passport');
 
 const app = express();
 
@@ -23,9 +24,11 @@ const PORT = process.env.PORT || 5000;
 // Initialize the database
 db();
 
-app.get('/', (req, res) => {
-  res.send('Hello World');
-});
+// Passport middleware
+app.use(passport.initialize());
+
+// Passport config
+require('./config/passport')(passport);
 
 // Using the routes for the application
 app.use('/api/users', users);
