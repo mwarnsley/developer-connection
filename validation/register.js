@@ -4,8 +4,51 @@ const isEmpty = require('./is-empty');
 module.exports = function validateRegisterInput(data) {
   let errors = {};
 
-  if ((!Validator.isLength(data.name), { min: 2, max: 30 })) {
+  data.name = !isEmpty(data.name) ? data.name : '';
+  data.email = !isEmpty(data.email) ? data.email : '';
+  data.password = !isEmpty(data.password) ? data.password : '';
+  data.confirmPassword = !isEmpty(data.confirmPassword)
+    ? data.confirmPassword
+    : '';
+
+  // Using validation to make sure that the name is between 2 and 30 characters when sent
+  if (!Validator.isLength(data.name, { min: 2, max: 30 })) {
     errors.name = 'Name must be between 2 and 30 characters';
+  }
+
+  // Using validation to make sure that the name field being sent is not empty
+  if (Validator.isEmpty(data.name)) {
+    errors.name = 'Name field is required';
+  }
+
+  // Using validation to make sure that the email field being sent is a valid email
+  if (!Validator.isEmail(data.email)) {
+    errors.email = 'Email is invalid';
+  }
+
+  // Using validation to make sure that the email field being sent is not empty
+  if (Validator.isEmpty(data.email)) {
+    errors.email = 'Email field is required';
+  }
+
+  // Using validation to make sure that the password is between 6 and 30 characters when sent
+  if (!Validator.isLength(data.password, { min: 6, max: 30 })) {
+    errors.password = 'Password must be between 6 and 30 characters';
+  }
+
+  // Using validation to make sure that the password field being sent is not empty
+  if (Validator.isEmpty(data.password)) {
+    errors.password = 'Password field is required';
+  }
+
+  // Using validation to make sure that the password field being sent is not empty
+  if (Validator.isEmpty(data.confirmPassword)) {
+    errors.confirmPassword = 'Confirm password field is required';
+  }
+
+  // Using validation to make sure that the password and confirm password match
+  if (!Validator.equals(data.password, data.confirmPassword)) {
+    errors.confirmPassword = 'Passwords must match';
   }
   return {
     errors,

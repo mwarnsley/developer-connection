@@ -8,6 +8,7 @@ const passport = require('passport');
 
 // Load input validation
 const validateRegisterInput = require('../../validation/register');
+const validateLoginInput = require('../../validation/login');
 
 // Loading the user model from mongoose
 const User = require('../../models/User');
@@ -19,6 +20,7 @@ router.get('/', (req, res) => {
 
 // @route GET api/users/register
 router.post('/register', (req, res) => {
+  console.log('req.body', req.body);
   const { errors, isValid } = validateRegisterInput(req.body);
 
   // Check validation on the register input
@@ -28,7 +30,8 @@ router.post('/register', (req, res) => {
   User.findOne({ email: req.body.email })
     .then(user => {
       if (user) {
-        res.status(400).json({ email: 'Email already exists' });
+        errors.email = 'Email already exists';
+        return res.status(400).json(errors);
       } else {
         const avatar = gravatar.url(req.body.email, {
           s: '200',
@@ -62,6 +65,12 @@ router.post('/register', (req, res) => {
 
 // @route GET api/users/login
 router.post('/login', (req, res) => {
+  const { errors, isValid } = validateLoginInput(req.body);
+
+  if (!isValid) {
+    return res.status(400).json(errors);
+  }
+
   const email = req.body.email;
   const password = req.body.password;
 
@@ -69,7 +78,8 @@ router.post('/login', (req, res) => {
   User.findOne({ email }).then(user => {
     // Check if user exists in database
     if (!user) {
-      return res.status(404).json({ email: 'User not found!' });
+      errors.email = 'User not found!';
+      return res.status(404).json(errors);
     }
 
     // Check if the password is correct
@@ -89,7 +99,8 @@ router.post('/login', (req, res) => {
           res.json({ success: true, jwtToken: `Bearer ${token}` });
         });
       } else {
-        return res.status(400).json({ password: 'Incorrect Password' });
+        errors.password = 'Password incorrect';
+        return res.status(400).json(errors);
       }
     });
   });
